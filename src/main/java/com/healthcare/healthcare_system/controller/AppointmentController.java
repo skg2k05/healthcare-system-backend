@@ -1,7 +1,9 @@
 package com.healthcare.healthcare_system.controller;
 
+import com.healthcare.healthcare_system.dto.AppointmentRequest;
 import com.healthcare.healthcare_system.dto.AppointmentResponse;
 import com.healthcare.healthcare_system.dto.AppointmentStatusRequest;
+import com.healthcare.healthcare_system.exception.ResourceNotFoundException;
 import com.healthcare.healthcare_system.model.Doctor;
 import com.healthcare.healthcare_system.model.User;
 import com.healthcare.healthcare_system.repository.DoctorRepository;
@@ -9,6 +11,7 @@ import com.healthcare.healthcare_system.repository.UserRepository;
 import com.healthcare.healthcare_system.service.AppointmentService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -78,4 +81,27 @@ public class AppointmentController {
                 request.getStatus()
         );
     }
+
+    @PostMapping
+    @PreAuthorize("hasRole('CITIZEN')")
+    public ResponseEntity<AppointmentResponse> createAppointment(
+            @RequestBody @Valid AppointmentRequest request,
+            Authentication authentication
+    ) {
+        User patient = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Doctor doctor = doctorRepository.findById(request.getDoctorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+
+        AppointmentResponse response =
+                appointmentService.createAppointment(
+                        patient,
+                        doctor,
+                        request.getAppointmentDate()
+                );
+
+        return ResponseEntity.ok(response);
+    }
+
 }

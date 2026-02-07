@@ -1,12 +1,12 @@
 package com.healthcare.healthcare_system.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -15,96 +15,91 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // 🧠 Check if request is coming from Swagger
+    private boolean isSwaggerRequest(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/v3/api-docs")
+                || path.startsWith("/swagger-ui");
+    }
 
-
-    // 404 - Resource not found
+    // 🔍 404 - Resource not found
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Object> handleResourceNotFound(
-            ResourceNotFoundException ex
+    public ResponseEntity<Object> handleNotFound(
+            ResourceNotFoundException ex,
+            HttpServletRequest request
     ) {
+        if (isSwaggerRequest(request)) throw ex; // 🚫 don’t touch Swagger
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    // 403 - Unauthorized business action
+    // ⛔ 403 - Business unauthorized
     @ExceptionHandler(UnauthorizedActionException.class)
-    public ResponseEntity<Object> handleUnauthorizedAction(
-            UnauthorizedActionException ex
+    public ResponseEntity<Object> handleUnauthorized(
+            UnauthorizedActionException ex,
+            HttpServletRequest request
     ) {
+        if (isSwaggerRequest(request)) throw ex;
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
-    // 400 - Invalid appointment status
+    // ⚠️ 400 - Invalid appointment status
     @ExceptionHandler(InvalidAppointmentStatusException.class)
     public ResponseEntity<Object> handleInvalidStatus(
-            InvalidAppointmentStatusException ex
+            InvalidAppointmentStatusException ex,
+            HttpServletRequest request
     ) {
+        if (isSwaggerRequest(request)) throw ex;
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-    // 🔒 403 - Access denied by Spring Security
+    // 🔒 403 - Spring Security access denied
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDenied(
-            AccessDeniedException ex
+            AccessDeniedException ex,
+            HttpServletRequest request
     ) {
-        return buildResponse(
-                HttpStatus.FORBIDDEN,
-                "Access is denied"
-        );
+        if (isSwaggerRequest(request)) throw ex;
+        return buildResponse(HttpStatus.FORBIDDEN, "Access is denied");
     }
 
-    // 🔑 401 - Authentication failure (invalid / missing JWT)
+    // 🔑 401 - Authentication failed
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<Object> handleAuthenticationException(
-            AuthenticationException ex
+    public ResponseEntity<Object> handleAuthentication(
+            AuthenticationException ex,
+            HttpServletRequest request
     ) {
-        return buildResponse(
-                HttpStatus.UNAUTHORIZED,
-                "Authentication failed"
-        );
+        if (isSwaggerRequest(request)) throw ex;
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Authentication failed");
     }
 
-    // 500 - Fallback (unexpected errors)
+    // 💥 500 - Fallback (unknown errors)
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleGenericException(Exception ex) {
+    public ResponseEntity<Object> handleGeneric(
+            Exception ex,
+            HttpServletRequest request
+    ) throws Exception {
+
+        // 🚨 Let Swagger/OpenAPI exceptions pass
+        if (isSwaggerRequest(request)) {
+            throw ex;
+        }
+
         return buildResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Something went wrong"
         );
     }
 
-    // 🔧 Helper method (single response format)
+    // 🛠️ Common response builder (single source of truth)
     private ResponseEntity<Object> buildResponse(
             HttpStatus status,
             String message
     ) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("message", message);
-
+        body.put("timestamp", LocalDateTime.now()); // ⏰ when
+        body.put("status", status.value());         // 🔢 status code
+        body.put("error", status.getReasonPhrase()); // ❗ error type
+        body.put("message", message);               // 📝 message
         return new ResponseEntity<>(body, status);
     }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handleValidationErrors(
-            MethodArgumentNotValidException ex
-    ) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Bad Request");
-
-        String message = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .findFirst()
-                .map(error -> error.getDefaultMessage())
-                .orElse("Validation failed");
-
-        body.put("message", message);
-
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-    }
-
 }

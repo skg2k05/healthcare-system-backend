@@ -4,6 +4,7 @@ import com.healthcare.healthcare_system.security.JwtFilter;
 import com.healthcare.healthcare_system.security.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -32,24 +33,18 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
 
-                        // 🔓 Swagger
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
-
-                        // 🔓 Auth
+                        // Public
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                        // 🔒 Doctor
-                        .requestMatchers("/api/appointments/doctor/**")
-                        .hasRole("DOCTOR")
+                        // Doctor endpoints
+                        .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
+                        .requestMatchers(HttpMethod.PATCH, "/api/appointments/*/status").hasRole("DOCTOR")
 
-                        // 🔒 Patient
-                        .requestMatchers("/api/appointments/**")
-                        .hasRole("CITIZEN")
+                        // Citizen endpoints
+                        .requestMatchers("/api/appointments/**").hasRole("CITIZEN")
 
+                        // Everything else
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

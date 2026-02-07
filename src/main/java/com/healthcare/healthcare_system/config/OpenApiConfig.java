@@ -13,32 +13,18 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI healthcareOpenAPI() {
 
-        SecurityScheme jwtScheme = new SecurityScheme()
+        SecurityScheme securityScheme = new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
                 .bearerFormat("JWT");
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("Healthcare Appointment System API")
-                        .description("""
-                                Role-based Healthcare Backend
-                                
-                                Roles:
-                                - CITIZEN (Patient)
-                                - DOCTOR
-                                
-                                Features:
-                                - JWT Authentication
-                                - Appointment booking
-                                - Status updates
-                                - Pagination
-                                """)
-                        .version("1.0.0")
-                )
-                .addSecurityItem(
-                        new SecurityRequirement().addList("bearerAuth")
-                )
-                .schemaRequirement("bearerAuth", jwtScheme);
+                        .title("Healthcare System API")
+                        .description("JWT secured APIs for Healthcare System")
+                        .version("1.0.0"))
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                .components(new io.swagger.v3.oas.models.Components()
+                        .addSecuritySchemes("bearerAuth", securityScheme));
     }
 }
