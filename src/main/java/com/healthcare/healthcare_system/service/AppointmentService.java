@@ -2,6 +2,8 @@ package com.healthcare.healthcare_system.service;
 
 import com.healthcare.healthcare_system.dto.AppointmentResponse;
 import com.healthcare.healthcare_system.exception.InvalidAppointmentStatusException;
+import com.healthcare.healthcare_system.exception.ResourceNotFoundException;
+import com.healthcare.healthcare_system.exception.UnauthorizedActionException;
 import com.healthcare.healthcare_system.model.Appointment;
 import com.healthcare.healthcare_system.model.AppointmentStatus;
 import com.healthcare.healthcare_system.model.Doctor;
@@ -51,26 +53,57 @@ public class AppointmentService {
             String newStatus
     ) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Appointment not found")
+                );
 
+        // Rule 1: Doctor ownership check
         if (!appointment.getDoctor().getId().equals(doctor.getId())) {
-            throw new RuntimeException("Unauthorized doctor access");
-        }
-
-        AppointmentStatus current = appointment.getStatus();
-        AppointmentStatus next = AppointmentStatus.valueOf(newStatus);
-
-        if (current == AppointmentStatus.COMPLETED) {
-            throw new InvalidAppointmentStatusException(
-                    "Invalid status transition from COMPLETED to " + next
+            throw new UnauthorizedActionException(
+                    "You cannot modify another doctor's appointment"
             );
         }
 
-        appointment.setStatus(next);
+        AppointmentStatus currentStatus = appointment.getStatus();
+        AppointmentStatus requestedStatus;
+
+        try {
+            requestedStatus = AppointmentStatus.valueOf(newStatus);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidAppointmentStatusException(
+                    "Invalid status value: " + newStatus
+            );
+        }
+
+        // Rule 2: Cancelled- appointments are final
+        if (currentStatus == AppointmentStatus.CANCELLED) {
+            throw new InvalidAppointmentStatusException(
+                    "Cancelled appointment cannot be updated"
+            );
+        }
+
+        // Rule 3: Completed appointments are final
+        if (currentStatus == AppointmentStatus.COMPLETED) {
+            throw new InvalidAppointmentStatusException(
+                    "Completed appointment cannot be updated"
+            );
+        }
+
+        // Rule 4: Prevent invalid transitions
+        if (currentStatus == AppointmentStatus.BOOKED &&
+                requestedStatus == AppointmentStatus.BOOKED) {
+            throw new InvalidAppointmentStatusException(
+                    "Appointment is already booked"
+            );
+        }
+
+        // All checks passed → update
+        appointment.setStatus(requestedStatus);
         appointmentRepository.save(appointment);
 
         return mapToResponse(appointment);
     }
+
 
     // ✅ Mapper
     private AppointmentResponse mapToResponse(Appointment appointment) {
