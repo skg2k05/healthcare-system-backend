@@ -11,6 +11,8 @@ import com.healthcare.healthcare_system.model.User;
 import com.healthcare.healthcare_system.repository.AppointmentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -136,6 +138,50 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
 
         return mapToResponse(appointment);
+    }
+
+    // 🧑‍⚕️ Doctor logic
+    public Appointment updateStatusByDoctor(Long id, String newStatus) {
+
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new InvalidAppointmentStatusException("Completed appointment cannot be updated");
+        }
+
+        AppointmentStatus status;
+        try {
+            status = AppointmentStatus.valueOf(newStatus);
+        } catch (Exception e) {
+            throw new InvalidAppointmentStatusException("Invalid status value: " + newStatus);
+        }
+
+        appointment.setStatus(status);
+        return appointmentRepository.save(appointment);
+    }
+
+    // 🧑 Citizen cancels OWN appointment
+    public Appointment cancelByCitizen(Long id) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String loggedInEmail = auth.getName();
+
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+
+        // ownership check
+        if (!appointment.getPatient().getEmail().equals(loggedInEmail)) {
+            throw new UnauthorizedActionException("You can cancel only your own appointment");
+        }
+
+        // status check
+        if (appointment.getStatus() != AppointmentStatus.BOOKED) {
+            throw new InvalidAppointmentStatusException("Only BOOKED appointments can be cancelled");
+        }
+
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        return appointmentRepository.save(appointment);
     }
 
 }

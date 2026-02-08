@@ -36,17 +36,16 @@ public class AppointmentController {
         this.doctorRepository = doctorRepository;
     }
 
-    // ✅ Patient: my appointments
+    // CITIZEN → view own appointments
     @PreAuthorize("hasRole('CITIZEN')")
     @GetMapping("/my")
     public List<AppointmentResponse> myAppointments(Authentication authentication) {
-        String email = authentication.getName();
-        User patient = userRepository.findByEmail(email)
+        User patient = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return appointmentService.getAppointmentsForPatient(patient);
     }
 
-    // ✅ Doctor: my appointments (PAGINATED)
+    // DOCTOR → view own appointments (paginated)
     @PreAuthorize("hasRole('DOCTOR')")
     @GetMapping("/doctor/my")
     public Page<AppointmentResponse> doctorAppointments(
@@ -54,15 +53,13 @@ public class AppointmentController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
     ) {
-        String email = authentication.getName();
-
-        Doctor doctor = doctorRepository.findByEmail(email)
+        Doctor doctor = doctorRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
         return appointmentService.getAppointmentsForDoctor(doctor, page, size);
     }
 
-    // ✅ Doctor: update appointment status
+    // DOCTOR → update appointment status (ONLY ONE METHOD)
     @PreAuthorize("hasRole('DOCTOR')")
     @PatchMapping("/{id}/status")
     public AppointmentResponse updateStatus(
@@ -70,9 +67,7 @@ public class AppointmentController {
             @Valid @RequestBody AppointmentStatusRequest request,
             Authentication authentication
     ) {
-        String email = authentication.getName();
-
-        Doctor doctor = doctorRepository.findByEmail(email)
+        Doctor doctor = doctorRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
         return appointmentService.updateAppointmentStatus(
@@ -82,8 +77,9 @@ public class AppointmentController {
         );
     }
 
-    @PostMapping
+    // CITIZEN → create appointment
     @PreAuthorize("hasRole('CITIZEN')")
+    @PostMapping
     public ResponseEntity<AppointmentResponse> createAppointment(
             @RequestBody @Valid AppointmentRequest request,
             Authentication authentication
@@ -104,4 +100,12 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    // CITIZEN → cancel OWN appointment
+    @PreAuthorize("hasRole('CITIZEN')")
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelByCitizen(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                appointmentService.cancelByCitizen(id)
+        );
+    }
 }
