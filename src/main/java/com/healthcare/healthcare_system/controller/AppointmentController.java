@@ -99,7 +99,6 @@ public class AppointmentController {
 
         return ResponseEntity.ok(response);
     }
-
     // CITIZEN → cancel OWN appointment
     @PreAuthorize("hasRole('CITIZEN')")
     @PatchMapping("/{id}/cancel")
