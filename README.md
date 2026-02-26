@@ -3,7 +3,7 @@
 A secure, role-based Healthcare Appointment Management backend built using Spring Boot.
 This project demonstrates production-level backend architecture with authentication, authorization, business rule enforcement, and API documentation.
 
-### Project Overview
+## Project Overview
 
 This system allows:
 - Citizens to book and manage appointments
@@ -12,14 +12,14 @@ This system allows:
 - Controlled appointment state transitions
 The focus of this project is backend architecture, security, and clean business logic implementation.
 
-### Architecture
+## Architecture
 
 The project follows layered architecture:
 ```
 Controller → Service → Repository → Database
 ```
 
-#### Layers:
+### Layers:
 - Controller Layer
 -- Handles API endpoints and request validation
 - Service Layer
@@ -37,13 +37,12 @@ Implemented using:
 ### Roles:
 - CITIZEN
 - DOCTOR
-
-Access Control:
+### Access Control:
 ```
 Endpoint Type	                Access Role
 Book Appointment	            CITIZEN
 View Own Appointments	        CITIZEN
-Cancel Own Appointment	      CITIZEN
+Cancel Own Appointment	        CITIZEN
 View Doctor Appointments	    DOCTOR
 Update Appointment Status	    DOCTOR
 ```
@@ -80,7 +79,7 @@ http://localhost:8081/swagger-ui/index.html
 ```
 All APIs can be tested directly through Swagger.
 
-### Project Structure
+## Project Structure
 ```
 controller/
 service/
@@ -91,7 +90,7 @@ security/
 exception/
 config/
 ```
-### Setup Instructions 
+## Setup Instructions 
 1. Clone Repository
 2. Configure MySQL in application.properties
 3. Run
@@ -101,7 +100,7 @@ mvn clean install
 4. Start application
 5. Open Swagger UI
 
-### Key Implemented Features
+## Key Implemented Features
 - JWT-based authentication
 - Role-based endpoint protection
 - Global exception handling
@@ -111,7 +110,7 @@ mvn clean install
 - DTO pattern for clean API responses
 - Validation using @Valid
 
-### Future Improvements
+## Future Improvements
 - Frontend integration (React)
 - Deployment (Render / AWS / Railway)
 - Email notifications
@@ -119,7 +118,7 @@ mvn clean install
 - Unit & Integration tests
 - Docker support
 
-### Learning Outcome 
+## Learning Outcome 
 This project demonstrates:
 - Secure API development
 - Clean architecture principles
