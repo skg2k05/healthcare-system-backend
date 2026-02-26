@@ -15,8 +15,9 @@ The focus of this project is backend architecture, security, and clean business 
 ### Architecture
 
 The project follows layered architecture:
-
+```
 Controller → Service → Repository → Database
+```
 
 #### Layers:
 - Controller Layer
@@ -36,6 +37,16 @@ Implemented using:
 ### Roles:
 - CITIZEN
 - DOCTOR
+
+Access Control:
+```
+Endpoint Type	                Access Role
+Book Appointment	            CITIZEN
+View Own Appointments	        CITIZEN
+Cancel Own Appointment	      CITIZEN
+View Doctor Appointments	    DOCTOR
+Update Appointment Status	    DOCTOR
+```
 
 ## Appointment State Rules
 The system enforces strict business rules:
@@ -61,3 +72,58 @@ This ensures data integrity and real-world workflow consistency.
 - MySQL
 - Swagger (springdoc-openapi)
 - Maven
+
+## API Documentation
+Swagger UI available at:
+```
+http://localhost:8081/swagger-ui/index.html
+```
+All APIs can be tested directly through Swagger.
+
+### Project Structure
+```
+controller/
+service/
+repository/
+model/
+dto/
+security/
+exception/
+config/
+```
+### Setup Instructions 
+1. Clone Repository
+2. Configure MySQL in application.properties
+3. Run
+```
+mvn clean install
+```
+4. Start application
+5. Open Swagger UI
+
+### Key Implemented Features
+- JWT-based authentication
+- Role-based endpoint protection
+- Global exception handling
+- Custom business exceptions
+- Appointment state machine logic
+- Pagination for doctor appointments
+- DTO pattern for clean API responses
+- Validation using @Valid
+
+### Future Improvements
+- Frontend integration (React)
+- Deployment (Render / AWS / Railway)
+- Email notifications
+- Admin role
+- Unit & Integration tests
+- Docker support
+
+### Learning Outcome 
+This project demonstrates:
+- Secure API development
+- Clean architecture principles
+- Business rule enforcement
+- Real-world state management
+- RESTful API design
+- Production-ready error handling
