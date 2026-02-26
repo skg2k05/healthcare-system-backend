@@ -40,11 +40,12 @@ Implemented using:
 ### Access Control:
 ```
 Endpoint Type	                Access Role
-Book Appointment	            CITIZEN
-View Own Appointments	        CITIZEN
-Cancel Own Appointment	        CITIZEN
-View Doctor Appointments	    DOCTOR
-Update Appointment Status	    DOCTOR
+-------------------------------------------
+Book Appointment	              CITIZEN
+View Own Appointments	          CITIZEN
+Cancel Own Appointment	          CITIZEN
+View Doctor Appointments	      DOCTOR
+Update Appointment Status	      DOCTOR
 ```
 
 ## Appointment State Rules
