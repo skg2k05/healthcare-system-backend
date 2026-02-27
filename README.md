@@ -82,14 +82,34 @@ All APIs can be tested directly through Swagger.
 
 ## Project Structure
 ```
-controller/
-service/
-repository/
-model/
-dto/
-security/
-exception/
-config/
+Healthcare_Appointment_System/
+├── HealthcareAppBE/                 # Backend (Spring Boot + JWT + JPA)
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/
+│   │   │   │   └── com/
+│   │   │   │       └── healthcare/
+│   │   │   │           └── healthcare_system/
+│   │   │   │               ├── controller/     # REST Controllers
+│   │   │   │               ├── service/        # Business logic
+│   │   │   │               ├── repository/     # JPA Repositories
+│   │   │   │               ├── model/          # Entities
+│   │   │   │               ├── dto/            # Request/Response DTOs
+│   │   │   │               ├── security/       # JWT Filter + JWT Utils
+│   │   │   │               ├── config/         # Security configuration
+│   │   │   │               ├── exception/      # Custom exceptions + handler
+│   │   │   │               └── HealthcareSystemApplication.java
+│   │   │   └── resources/
+│   │   │       ├── application.properties
+│   │   │       └── ...
+│   │   └── test/                                 # (future unit tests)
+│   ├── pom.xml
+│   └── README_BE.md                              # (optional backend-specific readme)
+│
+└── HealthcareAppFE/              # (Future Frontend – React / etc.)
+    ├── src/
+    ├── package.json
+    └── README_FE.md
 ```
 ## Setup Instructions 
 1. Clone Repository
