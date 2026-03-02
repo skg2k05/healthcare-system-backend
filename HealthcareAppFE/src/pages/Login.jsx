@@ -1,7 +1,10 @@
 import { useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -9,10 +12,10 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/login",
-        { email, password }
-      );
+      const response = await api.post("/api/auth/login", {
+        email,
+        password,
+      });
 
       const token = response.data.token;
       const role = response.data.role;
@@ -20,7 +23,11 @@ function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
 
-      alert("Login Successful!");
+      if (role === "CITIZEN") {
+        navigate("/citizen");
+      } else if (role === "DOCTOR") {
+        navigate("/doctor");
+      }
 
     } catch (error) {
       alert("Login Failed");
@@ -31,6 +38,7 @@ function Login() {
   return (
     <div style={{ padding: "50px" }}>
       <h2>Login</h2>
+
       <form onSubmit={handleLogin}>
         <div>
           <input
@@ -41,7 +49,9 @@ function Login() {
             required
           />
         </div>
+
         <br />
+
         <div>
           <input
             type="password"
@@ -51,7 +61,9 @@ function Login() {
             required
           />
         </div>
+
         <br />
+
         <button type="submit">Login</button>
       </form>
     </div>
