@@ -17,27 +17,17 @@ public class DataInitializer {
     @PostConstruct
     public void seedDoctors() {
 
-        if (doctorRepository.count() == 0) {
+        seedDoctorIfNotExists("Dr. Sharma", "dr.sharma@test.com", "Cardiology");
+        seedDoctorIfNotExists("Dr. Mehta", "dr.mehta@test.com", "Dermatology");
+        seedDoctorIfNotExists("Dr. Iyer", "dr.iyer@test.com", "Neurology");
 
-            doctorRepository.save(new Doctor(
-                    "Dr. Sharma",
-                    "dr.sharma@test.com",
-                    "Cardiology"
-            ));
+        System.out.println("Doctor seeding check completed.");
+    }
 
-            doctorRepository.save(new Doctor(
-                    "Dr. Mehta",
-                    "dr.mehta@test.com",
-                    "Dermatology"
-            ));
-
-            doctorRepository.save(new Doctor(
-                    "Dr. Iyer",
-                    "dr.iyer@test.com",
-                    "Neurology"
-            ));
-
-            System.out.println("Doctors seeded successfully.");
+    private void seedDoctorIfNotExists(String name, String email, String specialization) {
+        if (doctorRepository.findByEmail(email).isEmpty()) {
+            doctorRepository.save(new Doctor(name, email, specialization));
+            System.out.println("Inserted: " + name);
         }
     }
 }
