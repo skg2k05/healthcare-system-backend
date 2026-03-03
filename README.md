@@ -38,6 +38,7 @@ Implemented using:
 - CITIZEN
 - DOCTOR
 ### Access Control:
+
 ```
 Endpoint Type	                Access Role
 -------------------------------------------
