@@ -84,6 +84,12 @@
 			<version>2.5.0</version>
 		</dependency>
 
+		<!-- PostgreSQL (for render) -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>
