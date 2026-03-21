@@ -37,13 +37,19 @@ public class AuthController {
     // LOGIN
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+
+        System.out.println("LOGIN HIT");
+        System.out.println("Email: " + request.getEmail());
+        System.out.println("Password: " + request.getPassword());
+
         try {
             User user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
+            System.out.println("DB Password: " + user.getPassword());
+
             boolean isPasswordValid;
 
-            // Handles both encoded and old plain-text passwords
             if (user.getPassword() != null && user.getPassword().startsWith("$2")) {
                 isPasswordValid = passwordEncoder.matches(request.getPassword(), user.getPassword());
             } else {
@@ -66,6 +72,7 @@ public class AuthController {
             ));
 
         } catch (Exception e) {
+            e.printStackTrace();   // VERY IMPORTANT
             return ResponseEntity.status(500).body(e.getMessage());
         }
     }
