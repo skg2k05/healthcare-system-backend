@@ -33,25 +33,24 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> {})   // enable CORS using bean below
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
 
-                        // ✅ PUBLIC (FIRST)
+                        // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                        // ✅ DOCTOR
+                        // Doctor endpoints
                         .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
                         .requestMatchers(HttpMethod.PATCH, "/api/appointments/*/status").hasRole("DOCTOR")
 
-                        // ✅ CITIZEN
+                        // Citizen endpoints
                         .requestMatchers("/api/appointments/**").hasRole("CITIZEN")
 
-                        // ✅ LAST RULE
+                        // Everything else
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -69,16 +68,13 @@ public class SecurityConfig {
                 "https://healthcare-system-backend-1.onrender.com"
         ));
 
-        configuration.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
-        ));
-
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 }
