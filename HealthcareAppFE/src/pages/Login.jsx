@@ -24,9 +24,9 @@ function Login() {
       localStorage.setItem("role", role);
 
       if (role === "CITIZEN") {
-        navigate("/citizen");
+        navigate("/citizen-dashboard");
       } else if (role === "DOCTOR") {
-        navigate("/doctor");
+        navigate("/doctor-dashboard");
       }
 
     } catch (error) {
