@@ -7,9 +7,12 @@ import com.healthcare.healthcare_system.exception.EmailAlreadyExistsException;
 import com.healthcare.healthcare_system.model.User;
 import com.healthcare.healthcare_system.repository.UserRepository;
 import com.healthcare.healthcare_system.security.JwtUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -33,56 +36,73 @@ public class AuthController {
 
     // LOGIN
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            User user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            boolean isPasswordValid;
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+            // Handles both encoded and old plain-text passwords
+            if (user.getPassword() != null && user.getPassword().startsWith("$2")) {
+                isPasswordValid = passwordEncoder.matches(request.getPassword(), user.getPassword());
+            } else {
+                isPasswordValid = user.getPassword().equals(request.getPassword());
+            }
+
+            if (!isPasswordValid) {
+                return ResponseEntity.status(401).body("Invalid password");
+            }
+
+            String token = jwtUtil.generateToken(
+                    user.getEmail(),
+                    user.getRole()
+            );
+
+            return ResponseEntity.ok(new AuthResponse(
+                    token,
+                    user.getEmail(),
+                    user.getRole()
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
         }
-
-        String token = jwtUtil.generateToken(
-                user.getEmail(),
-                user.getRole()
-        );
-
-        return new AuthResponse(
-                token,
-                user.getEmail(),
-                user.getRole()
-        );
     }
 
     // REGISTER (CITIZEN ONLY)
     @PostMapping("/register")
-    public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+        try {
+            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+                throw new EmailAlreadyExistsException("Email already registered");
+            }
 
-        System.out.println("REGISTER HIT");
-        System.out.println("Name: " + request.getName());
-        System.out.println("Email: " + request.getEmail());
+            User user = new User();
+            user.setName(request.getName());
+            user.setEmail(request.getEmail());
 
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new EmailAlreadyExistsException("Email already registered");
+            // Always encode password before saving
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            user.setRole("CITIZEN");
+
+            userRepository.save(user);
+
+            String token = jwtUtil.generateToken(
+                    user.getEmail(),
+                    user.getRole()
+            );
+
+            return ResponseEntity.ok(new AuthResponse(
+                    token,
+                    user.getEmail(),
+                    user.getRole()
+            ));
+
+        } catch (EmailAlreadyExistsException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
         }
-
-        User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole("CITIZEN");
-
-        userRepository.save(user);
-
-        String token = jwtUtil.generateToken(
-                user.getEmail(),
-                user.getRole()
-        );
-
-        return new AuthResponse(
-                token,
-                user.getEmail(),
-                user.getRole()
-        );
     }
 }
