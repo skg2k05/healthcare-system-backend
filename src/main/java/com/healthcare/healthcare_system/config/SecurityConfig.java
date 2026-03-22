@@ -70,7 +70,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://localhost:3000",
-                "https://healthcare-system-frontend.onrender.com" // <--- REPLACE WITH YOUR REAL FRONTEND URL
+                "https://healthcare-system-backend-1.onrender.com/" // <--- REPLACE WITH YOUR REAL FRONTEND URL
         ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
