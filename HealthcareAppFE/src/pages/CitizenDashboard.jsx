@@ -15,32 +15,51 @@ function CitizenDashboard() {
 
   const fetchAppointments = async () => {
     try {
+      // GET requests work, so we keep this as is
       const response = await api.get("/api/appointments/my");
       setAppointments(response.data);
     } catch (error) {
-      console.error("Error fetching appointments", error);
+      console.error("Error fetching appointments:", error);
     }
   };
 
   const handleBooking = async (e) => {
     e.preventDefault();
 
+    // 1. Formatting the date:
+    // HTML datetime-local gives "YYYY-MM-DDTHH:mm"
+    // Spring Boot often expects "YYYY-MM-DDTHH:mm:ss"
+    const formattedDate = appointmentDate.includes(":") && appointmentDate.split(":").length === 2
+      ? `${appointmentDate}:00`
+      : appointmentDate;
+
+    const payload = {
+      doctorId: Number(doctorId),
+      appointmentDate: formattedDate,
+    };
+
+    console.log("Sending Payload:", payload);
+
     try {
-      await api.post("/api/appointments", {
-        doctorId: Number(doctorId),
-        appointmentDate: appointmentDate,
-      });
+      // Using a clean path without trailing slashes
+      const response = await api.post("/api/appointments", payload);
 
-      alert("Appointment booked successfully!");
-
-      setDoctorId("");
-      setAppointmentDate("");
-
-      fetchAppointments(); // refresh list
-
+      if (response.status === 200 || response.status === 201) {
+        alert("Appointment booked successfully!");
+        setDoctorId("");
+        setAppointmentDate("");
+        fetchAppointments(); // refresh list
+      }
     } catch (error) {
-      console.error("Booking failed", error);
-      alert("Booking failed");
+      // Detailed logging to see if it's a CORS, 404, or 400 error
+      if (error.response) {
+        console.error("Backend Error Data:", error.response.data);
+        console.error("Status Code:", error.response.status);
+        alert(`Booking failed: ${error.response.data.message || "Server Error"}`);
+      } else {
+        console.error("Request Error:", error.message);
+        alert("Booking failed: Could not connect to server.");
+      }
     }
   };
 
@@ -49,7 +68,7 @@ function CitizenDashboard() {
       await api.patch(`/api/appointments/${id}/cancel`);
       fetchAppointments();
     } catch (error) {
-      console.error("Cancel failed", error);
+      console.error("Cancel failed:", error);
     }
   };
 
@@ -60,41 +79,47 @@ function CitizenDashboard() {
   };
 
   return (
-    <div style={{ padding: "50px" }}>
-      <h2>Citizen Dashboard</h2>
-
-      <button onClick={handleLogout}>Logout</button>
+    <div style={{ padding: "50px", fontFamily: "Arial, sans-serif" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h2>Citizen Dashboard</h2>
+        <button onClick={handleLogout} style={{ backgroundColor: "#ff4d4d", color: "white", border: "none", padding: "10px 20px", cursor: "pointer" }}>
+          Logout
+        </button>
+      </div>
 
       <hr />
 
-      <h3>Book Appointment</h3>
+      <div style={{ maxWidth: "400px", background: "#f9f9f9", padding: "20px", borderRadius: "8px" }}>
+        <h3>Book Appointment</h3>
+        <form onSubmit={handleBooking}>
+          <div style={{ marginBottom: "15px" }}>
+            <label>Doctor ID:</label>
+            <input
+              type="number"
+              placeholder="Enter Doctor ID"
+              value={doctorId}
+              onChange={(e) => setDoctorId(e.target.value)}
+              required
+              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+            />
+          </div>
 
-      <form onSubmit={handleBooking}>
-        <div>
-          <input
-            type="number"
-            placeholder="Enter Doctor ID"
-            value={doctorId}
-            onChange={(e) => setDoctorId(e.target.value)}
-            required
-          />
-        </div>
+          <div style={{ marginBottom: "15px" }}>
+            <label>Date & Time:</label>
+            <input
+              type="datetime-local"
+              value={appointmentDate}
+              onChange={(e) => setAppointmentDate(e.target.value)}
+              required
+              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+            />
+          </div>
 
-        <br />
-
-        <div>
-          <input
-            type="datetime-local"
-            value={appointmentDate}
-            onChange={(e) => setAppointmentDate(e.target.value)}
-            required
-          />
-        </div>
-
-        <br />
-
-        <button type="submit">Book Appointment</button>
-      </form>
+          <button type="submit" style={{ width: "100%", padding: "10px", backgroundColor: "#007bff", color: "white", border: "none", cursor: "pointer" }}>
+            Confirm Booking
+          </button>
+        </form>
+      </div>
 
       <hr />
 
@@ -103,40 +128,7 @@ function CitizenDashboard() {
       {appointments.length === 0 ? (
         <p>No appointments found.</p>
       ) : (
-        <ul>
+        <div style={{ display: "grid", gap: "15px" }}>
           {appointments.map((appointment) => (
-            <li key={appointment.id} style={{ marginBottom: "15px" }}>
-              <strong>Doctor:</strong> {appointment.doctorName} <br />
-              <strong>Specialization:</strong> {appointment.specialization} <br />
-              <strong>Status:</strong>{" "}
-              <span
-                style={{
-                  color:
-                    appointment.status === "BOOKED"
-                      ? "blue"
-                      : appointment.status === "COMPLETED"
-                      ? "green"
-                      : "red",
-                  fontWeight: "bold",
-                }}
-              >
-                {appointment.status}
-              </span>
-
-              {appointment.status === "BOOKED" && (
-                <>
-                  <br />
-                  <button onClick={() => handleCancel(appointment.id)}>
-                    Cancel Appointment
-                  </button>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-export default CitizenDashboard;
+            <div key={appointment.id} style={{ border: "1px solid #ddd", padding: "15px", borderRadius: "5px" }}>
+              <strong>Doctor:</strong> {appointment.

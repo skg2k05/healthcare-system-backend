@@ -28,29 +28,33 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         JwtFilter jwtFilter = new JwtFilter(jwtUtil);
 
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {})   // enable CORS using bean below
+                // Explicitly point to the corsConfigurationSource bean
+
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-
-                        // Public endpoints
+                        // 1. Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                        // Doctor endpoints
+                        // 2. DOCTOR Specific (More specific paths first)
                         .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
                         .requestMatchers(HttpMethod.PATCH, "/api/appointments/*/status").hasRole("DOCTOR")
 
-                        // Citizen endpoints
-                        .requestMatchers("/api/appointments/**").hasRole("CITIZEN")
+                        // 3. CITIZEN Specific (The POST /api/appointments falls here)
+                        .requestMatchers(HttpMethod.POST, "/api/appointments").hasRole("CITIZEN")
+                        .requestMatchers(HttpMethod.GET, "/api/appointments/my").hasRole("CITIZEN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/appointments/*/cancel").hasRole("CITIZEN")
 
-                        // Everything else
+                        // 4. Fallback for any other appointments path
+                        .requestMatchers("/api/appointments/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -62,19 +66,20 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
+        // IMPORTANT: Add your actual RENDER FRONTEND URL here
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://localhost:3000",
-                "https://healthcare-system-backend-1.onrender.com"
+                "https://healthcare-system-frontend.onrender.com" // <--- REPLACE WITH YOUR REAL FRONTEND URL
         ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L); // Cache preflight for 1 hour
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 }
