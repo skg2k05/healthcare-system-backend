@@ -15,7 +15,6 @@ function CitizenDashboard() {
 
   const fetchAppointments = async () => {
     try {
-      // GET requests work, so we keep this as is
       const response = await api.get("/api/appointments/my");
       setAppointments(response.data);
     } catch (error) {
@@ -26,9 +25,7 @@ function CitizenDashboard() {
   const handleBooking = async (e) => {
     e.preventDefault();
 
-    // 1. Formatting the date:
-    // HTML datetime-local gives "YYYY-MM-DDTHH:mm"
-    // Spring Boot often expects "YYYY-MM-DDTHH:mm:ss"
+    // Formatting date to include seconds for Spring Boot LocalDateTime
     const formattedDate = appointmentDate.includes(":") && appointmentDate.split(":").length === 2
       ? `${appointmentDate}:00`
       : appointmentDate;
@@ -38,23 +35,18 @@ function CitizenDashboard() {
       appointmentDate: formattedDate,
     };
 
-    console.log("Sending Payload:", payload);
-
     try {
-      // Using a clean path without trailing slashes
       const response = await api.post("/api/appointments", payload);
 
       if (response.status === 200 || response.status === 201) {
         alert("Appointment booked successfully!");
         setDoctorId("");
         setAppointmentDate("");
-        fetchAppointments(); // refresh list
+        fetchAppointments();
       }
     } catch (error) {
-      // Detailed logging to see if it's a CORS, 404, or 400 error
       if (error.response) {
         console.error("Backend Error Data:", error.response.data);
-        console.error("Status Code:", error.response.status);
         alert(`Booking failed: ${error.response.data.message || "Server Error"}`);
       } else {
         console.error("Request Error:", error.message);
@@ -131,4 +123,40 @@ function CitizenDashboard() {
         <div style={{ display: "grid", gap: "15px" }}>
           {appointments.map((appointment) => (
             <div key={appointment.id} style={{ border: "1px solid #ddd", padding: "15px", borderRadius: "5px" }}>
-              <strong>Doctor:</strong> {appointment.
+              <strong>Doctor:</strong> {appointment.doctorName} <br />
+              <strong>Specialization:</strong> {appointment.specialization} <br />
+              <strong>Date:</strong> {new Date(appointment.appointmentDate).toLocaleString()} <br />
+              <strong>Status:</strong>{" "}
+              <span
+                style={{
+                  color:
+                    appointment.status === "BOOKED"
+                      ? "blue"
+                      : appointment.status === "COMPLETED"
+                      ? "green"
+                      : "red",
+                  fontWeight: "bold",
+                }}
+              >
+                {appointment.status}
+              </span>
+
+              {appointment.status === "BOOKED" && (
+                <div style={{ marginTop: "10px" }}>
+                  <button
+                    onClick={() => handleCancel(appointment.id)}
+                    style={{ backgroundColor: "transparent", color: "red", border: "1px solid red", cursor: "pointer", padding: "5px 10px" }}
+                  >
+                    Cancel Appointment
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default CitizenDashboard;
