@@ -2,6 +2,7 @@ package com.healthcare.healthcare_system.config;
 
 import com.healthcare.healthcare_system.security.JwtFilter;
 import com.healthcare.healthcare_system.security.JwtUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,6 +15,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -21,6 +24,9 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+
+    @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000}")
+    private String allowedOrigins;
 
     public SecurityConfig(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -32,29 +38,22 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                // Explicitly point to the corsConfigurationSource bean
-
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                        // 2. DOCTOR Specific (More specific paths first)
                         .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
                         .requestMatchers(HttpMethod.PATCH, "/api/appointments/*/status").hasRole("DOCTOR")
 
-                        // 3. CITIZEN Specific (The POST /api/appointments falls here)
                         .requestMatchers(HttpMethod.POST, "/api/appointments").hasRole("CITIZEN")
                         .requestMatchers(HttpMethod.GET, "/api/appointments/my").hasRole("CITIZEN")
                         .requestMatchers(HttpMethod.PATCH, "/api/appointments/*/cancel").hasRole("CITIZEN")
 
-                        // 4. Fallback for any other appointments path
                         .requestMatchers("/api/appointments/**").authenticated()
-
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -66,17 +65,17 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // IMPORTANT: Add your actual RENDER FRONTEND URL here
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://localhost:3000",
-                "https://healthcare-system-backend-1.onrender.com/" // <--- REPLACE WITH YOUR REAL FRONTEND URL
-        ));
+        List<String> origins = new ArrayList<>();
+        Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isBlank())
+                .forEach(origins::add);
 
+        configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L); // Cache preflight for 1 hour
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
