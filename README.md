@@ -172,3 +172,8 @@ If login works locally but fails on Render, verify the following:
    `https://<backend-url>/api/auth/login`
 3. Confirm backend CORS allows your exact frontend domain.
 4. Confirm user actually exists in the deployed database.
+
+### Default Seed Login Users
+On startup, the app now ensures these login users exist:
+- `kabir@test.com` / `secret1234` (role: `CITIZEN`)
+- `dr.sharma@test.com` / `doctor123` (role: `DOCTOR`)
