@@ -1,150 +1,159 @@
-## Healthcare Appointment Management System (Backend)
+# Healthcare Appointment Management System
 
-A secure, role-based Healthcare Appointment Management backend built using Spring Boot.
-This project demonstrates production-level backend architecture with authentication, authorization, business rule enforcement, and API documentation.
+Production-style full-stack healthcare appointment platform with role-based access for **Citizens (Patients)** and **Doctors**.
 
-## Project Overview
+## ✅ Stable Release
+This repository is now frozen as **v1.0.0 (stable baseline)** for portfolio/resume use.
 
-This system allows:
-- Citizens to book and manage appointments
-- Doctors to view and update appointment status
-- Role-based secure access using JWT
-- Controlled appointment state transitions
-The focus of this project is backend architecture, security, and clean business logic implementation.
+> Status: Deployed and working with role-based login and appointment workflows.
+
+---
+
+## Live Deployment
+- **Frontend:** https://healthcare-system-backend-1.onrender.com
+- **Backend API:** https://healthcare-system-backend-t79z.onrender.com
+- **Health Check:** `GET /api/health`
+
+---
+
+## Key Features
+
+### Authentication & Authorization
+- JWT-based authentication
+- Role-based route protection (`CITIZEN`, `DOCTOR`)
+- Stateless Spring Security config
+
+### Citizen Capabilities
+- Login/register
+- Book appointment
+- View own appointments
+- Cancel booked appointments
+
+### Doctor Capabilities
+- Login
+- View assigned appointments (paginated)
+- Update appointment status
+
+### Business Rules Enforced
+- Completed appointments cannot be modified
+- Cancelled appointments cannot be updated
+- Citizens can manage only their own appointments
+- Doctors can update only their assigned appointments
+
+---
+
+## Tech Stack
+
+### Backend
+- Java 17
+- Spring Boot 3
+- Spring Security
+- Spring Data JPA (Hibernate)
+- PostgreSQL / MySQL compatible datasource config
+- JWT (jjwt)
+- Swagger / OpenAPI
+
+### Frontend
+- React + Vite
+- Axios
+- React Router
+
+### Deployment
+- Render (frontend + backend + managed Postgres)
+
+---
 
 ## Architecture
 
-The project follows layered architecture:
+```text
+Frontend (React/Vite)
+   ↓ HTTPS (JWT)
+Backend (Spring Boot)
+   ↓ JPA/Hibernate
+PostgreSQL (Render)
 ```
+
+Layering:
+```text
 Controller → Service → Repository → Database
 ```
 
-### Layers:
-- Controller Layer
--- Handles API endpoints and request validation
-- Service Layer
--- Contains business rules and state transition logic
-- Repository Layer
--- JPA-based database access
-- Security Layer
--- JWT authentication & role-based authorization
+---
 
-## Authentication & Authorization
-Implemented using:
-- Spring Security
-- JWT (JSON Web Token)
-- Stateless session management
-### Roles:
-- CITIZEN
-- DOCTOR
-### Access Control:
+## Demo Credentials (Seeded)
+For demo/testing on deployed app:
+- **Citizen:** `kabir@test.com` / `secret1234`
+- **Doctor:** `dr.sharma@test.com` / `doctor123`
 
-```
-Endpoint Type	                Access Role
--------------------------------------------
-Book Appointment	              CITIZEN
-View Own Appointments	          CITIZEN
-Cancel Own Appointment	          CITIZEN
-View Doctor Appointments	      DOCTOR
-Update Appointment Status	      DOCTOR
-```
+> These users are seeded/updated at startup for demo reliability.
 
-## Appointment State Rules
-The system enforces strict business rules:
-### Possible States:
-- BOOKED
-- CANCELLED
-- COMPLETED
-### Rules Implemented:
-- Cancelled appointments cannot be updated
-- Completed appointments cannot be modified
-- Only BOOKED appointments can be cancelled
-- Doctors can only modify their own appointments
-- Citizens can only cancel their own appointments
+---
 
-This ensures data integrity and real-world workflow consistency.
+## API Highlights
 
-## Tech Stack
-- Java 17
-- Spring Boot
-- Spring Security
-- JWT (jjwt)
-- Spring Data JPA (Hibernate)
-- MySQL
-- Swagger (springdoc-openapi)
-- Maven
+### Public
+- `POST /api/auth/login`
+- `POST /api/auth/register`
+- `GET /api/health`
 
-## API Documentation
-Swagger UI available at:
-```
-http://localhost:8081/swagger-ui/index.html
-```
-All APIs can be tested directly through Swagger.
+### Citizen-only
+- `POST /api/appointments`
+- `GET /api/appointments/my`
+- `PATCH /api/appointments/{id}/cancel`
 
-## Project Structure
-```
-Healthcare_Appointment_System/
-├── HealthcareAppBE/                 # Backend (Spring Boot + JWT + JPA)
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/
-│   │   │   │   └── com/
-│   │   │   │       └── healthcare/
-│   │   │   │           └── healthcare_system/
-│   │   │   │               ├── controller/     # REST Controllers
-│   │   │   │               ├── service/        # Business logic
-│   │   │   │               ├── repository/     # JPA Repositories
-│   │   │   │               ├── model/          # Entities
-│   │   │   │               ├── dto/            # Request/Response DTOs
-│   │   │   │               ├── security/       # JWT Filter + JWT Utils
-│   │   │   │               ├── config/         # Security configuration
-│   │   │   │               ├── exception/      # Custom exceptions + handler
-│   │   │   │               └── HealthcareSystemApplication.java
-│   │   │   └── resources/
-│   │   │       ├── application.properties
-│   │   │       └── ...
-│   │   └── test/                                 # (future unit tests)
-│   ├── pom.xml
-│   └── README_BE.md                              # (optional backend-specific readme)
-│
-└── HealthcareAppFE/              # (Future Frontend – React / etc.)
-    ├── src/
-    ├── package.json
-    └── README_FE.md
-```
-## Setup Instructions 
-1. Clone Repository
-2. Configure MySQL in application.properties
-3. Run
-```
+### Doctor-only
+- `GET /api/appointments/doctor/{doctorEmail}`
+- `PATCH /api/appointments/{id}/status`
+
+Swagger UI (local):
+- `http://localhost:8081/swagger-ui/index.html`
+
+---
+
+## Environment Variables
+
+### Backend
+- `PORT` (Render auto-injects)
+- `DB_URL`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `APP_CORS_ALLOWED_ORIGINS`
+
+### Frontend
+- `VITE_API_BASE_URL`
+- `VITE_API_TIMEOUT_MS` (optional; defaults to 60000ms)
+
+---
+
+## Local Development
+
+### Backend
+```bash
 mvn clean install
+mvn spring-boot:run
 ```
-4. Start application
-5. Open Swagger UI
 
-## Key Implemented Features
-- JWT-based authentication
-- Role-based endpoint protection
-- Global exception handling
-- Custom business exceptions
-- Appointment state machine logic
-- Pagination for doctor appointments
-- DTO pattern for clean API responses
-- Validation using @Valid
+### Frontend
+```bash
+cd HealthcareAppFE
+npm install
+npm run dev
+```
 
-## Future Improvements
-- Frontend integration (React)
-- Deployment (Render / AWS / Railway)
-- Email notifications
-- Admin role
-- Unit & Integration tests
-- Docker support
+---
 
-## Learning Outcome 
-This project demonstrates:
-- Secure API development
-- Clean architecture principles
-- Business rule enforcement
-- Real-world state management
-- RESTful API design
-- Production-ready error handling
+## Resume-ready Impact Points
+- Built and deployed a secure, role-based healthcare platform on Render.
+- Implemented JWT auth with Spring Security and protected API routes by role.
+- Designed appointment state workflow with real-world business constraints.
+- Integrated React frontend with production backend and environment-based configs.
+- Troubleshot deployment issues across CORS, DB, auth, and cold-start behavior.
+
+---
+
+## Roadmap (Next Iterations)
+- Automated tests (unit + integration)
+- Admin role and management panel
+- Better UI/UX polish
+- Notifications/email integration
+- CI/CD pipeline and quality gates
