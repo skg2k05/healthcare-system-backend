@@ -1,17 +1,28 @@
 package com.healthcare.healthcare_system.config;
 
 import com.healthcare.healthcare_system.model.Doctor;
+import com.healthcare.healthcare_system.model.User;
 import com.healthcare.healthcare_system.repository.DoctorRepository;
+import com.healthcare.healthcare_system.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Component
 public class DataInitializer {
 
     private final DoctorRepository doctorRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(DoctorRepository doctorRepository) {
+    public DataInitializer(
+            DoctorRepository doctorRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder
+    ) {
         this.doctorRepository = doctorRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostConstruct
@@ -21,6 +32,9 @@ public class DataInitializer {
         seedDoctorIfNotExists("Dr. Mehta", "dr.mehta@test.com", "Dermatology");
         seedDoctorIfNotExists("Dr. Iyer", "dr.iyer@test.com", "Neurology");
 
+        seedUserIfNotExists("Kabir Patient", "kabir@test.com", "CITIZEN", "secret1234");
+        seedUserIfNotExists("Dr. Sharma", "dr.sharma@test.com", "DOCTOR", "doctor123");
+
         System.out.println("Doctor seeding check completed.");
     }
 
@@ -28,6 +42,18 @@ public class DataInitializer {
         if (doctorRepository.findByEmail(email).isEmpty()) {
             doctorRepository.save(new Doctor(name, email, specialization));
             System.out.println("Inserted: " + name);
+        }
+    }
+
+    private void seedUserIfNotExists(String name, String email, String role, String rawPassword) {
+        if (userRepository.findByEmail(email).isEmpty()) {
+            User user = new User();
+            user.setName(name);
+            user.setEmail(email);
+            user.setRole(role);
+            user.setPassword(passwordEncoder.encode(rawPassword));
+            userRepository.save(user);
+            System.out.println("Inserted login user: " + email + " (" + role + ")");
         }
     }
 }
