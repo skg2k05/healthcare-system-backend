@@ -32,6 +32,8 @@ public class DataInitializer {
         seedDoctorIfNotExists("Dr. Mehta", "dr.mehta@test.com", "Dermatology");
         seedDoctorIfNotExists("Dr. Iyer", "dr.iyer@test.com", "Neurology");
 
+        seedOrUpdateDefaultUser("Kabir Patient", "kabir@test.com", "CITIZEN", "secret1234");
+        seedOrUpdateDefaultUser("Dr. Sharma", "dr.sharma@test.com", "DOCTOR", "doctor123");
         seedUserIfNotExists("Kabir Patient", "kabir@test.com", "CITIZEN", "secret1234");
         seedUserIfNotExists("Dr. Sharma", "dr.sharma@test.com", "DOCTOR", "doctor123");
 
@@ -45,6 +47,16 @@ public class DataInitializer {
         }
     }
 
+    private void seedOrUpdateDefaultUser(String name, String email, String role, String rawPassword) {
+        User user = userRepository.findByEmail(email).orElseGet(User::new);
+
+        user.setName(name);
+        user.setEmail(email);
+        user.setRole(role);
+        user.setPassword(passwordEncoder.encode(rawPassword));
+
+        userRepository.save(user);
+        System.out.println("Seeded/updated login user: " + email + " (" + role + ")");
     private void seedUserIfNotExists(String name, String email, String role, String rawPassword) {
         if (userRepository.findByEmail(email).isEmpty()) {
             User user = new User();

@@ -174,6 +174,7 @@ If login works locally but fails on Render, verify the following:
 4. Confirm user actually exists in the deployed database.
 
 ### Default Seed Login Users
+On startup, the app seeds/updates these login users:
 On startup, the app now ensures these login users exist:
 - `kabir@test.com` / `secret1234` (role: `CITIZEN`)
 - `dr.sharma@test.com` / `doctor123` (role: `DOCTOR`)
