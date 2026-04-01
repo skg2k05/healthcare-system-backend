@@ -47,6 +47,7 @@ View Own Appointments	          CITIZEN
 Cancel Own Appointment	          CITIZEN
 View Doctor Appointments	      DOCTOR
 Update Appointment Status	      DOCTOR
+List Doctors	                  AUTHENTICATED USER
 ```
 
 ## Appointment State Rules
@@ -148,3 +149,35 @@ This project demonstrates:
 - Real-world state management
 - RESTful API design
 - Production-ready error handling
+
+## Render Deployment Notes (Backend + Frontend)
+
+If login works locally but fails on Render, verify the following:
+
+### Backend (Web Service)
+- Start command: `./mvnw spring-boot:run` (or use a Docker deploy if preferred)
+- Required environment variables:
+  - `DB_URL` (Render PostgreSQL **External Database URL** / JDBC format)
+  - `DB_USERNAME`
+  - `DB_PASSWORD`
+  - `APP_CORS_ALLOWED_ORIGINS` (comma-separated list, include frontend URL)
+  - `PORT` (Render sets this automatically)
+
+### Frontend (Static Site / Web Service)
+- `VITE_API_BASE_URL=https://<your-backend-service>.onrender.com`
+- Optional: `VITE_API_TIMEOUT_MS=60000` (helps with free-tier cold starts)
+
+### Quick Validation Checklist
+1. Open `https://<backend-url>/api/health` and confirm it responds.
+2. In browser DevTools > Network, confirm login request hits:
+   `https://<backend-url>/api/auth/login`
+3. Confirm backend CORS allows your exact frontend domain.
+4. Confirm user actually exists in the deployed database.
+
+### Default Seed Login Users
+On startup, the app seeds/updates these login users:
+- `kabir@test.com` / `secret1234` (role: `CITIZEN`)
+- `dr.sharma@test.com` / `doctor123` (role: `DOCTOR`)
+
+## Stable Release Note
+- Baseline freeze: `v1.0.0` (see `CHANGELOG.md`).
