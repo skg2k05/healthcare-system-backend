@@ -122,6 +122,7 @@ function CitizenDashboard() {
               type="datetime-local"
               value={appointmentDate}
               onChange={(e) => setAppointmentDate(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
               required
             />
           </label>
