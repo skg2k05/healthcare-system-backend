@@ -4,7 +4,6 @@ import api from "../services/api";
 
 function Login() {
   const navigate = useNavigate();
-  const buildTag = import.meta.env.VITE_APP_BUILD_TAG || "local";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -59,8 +58,6 @@ function Login() {
             <button type="submit" className="primary">Login</button>
           </div>
         </form>
-
-        <p className="muted" style={{ marginTop: 12, fontSize: 12 }}>Build: {buildTag}</p>
       </div>
     </div>
   );
