@@ -5,12 +5,14 @@ import api from "../services/api";
 function CitizenDashboard() {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
+  const [doctors, setDoctors] = useState([]);
 
   const [doctorId, setDoctorId] = useState("");
   const [appointmentDate, setAppointmentDate] = useState("");
 
   useEffect(() => {
     fetchAppointments();
+    fetchDoctors();
   }, []);
 
   const fetchAppointments = async () => {
@@ -19,6 +21,15 @@ function CitizenDashboard() {
       setAppointments(response.data);
     } catch (error) {
       console.error("Error fetching appointments:", error);
+    }
+  };
+
+  const fetchDoctors = async () => {
+    try {
+      const response = await api.get("/api/doctors");
+      setDoctors(response.data || []);
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
     }
   };
 
@@ -86,14 +97,19 @@ function CitizenDashboard() {
         <form onSubmit={handleBooking}>
           <div style={{ marginBottom: "15px" }}>
             <label>Doctor ID:</label>
-            <input
-              type="number"
-              placeholder="Enter Doctor ID"
+            <select
               value={doctorId}
               onChange={(e) => setDoctorId(e.target.value)}
               required
               style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-            />
+            >
+              <option value="">Select a doctor</option>
+              {doctors.map((doctor) => (
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.name} (ID: {doctor.id}) - {doctor.specialization}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div style={{ marginBottom: "15px" }}>
