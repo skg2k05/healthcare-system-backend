@@ -2,15 +2,29 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
+function formatAppointmentDate(rawDate) {
+  if (!rawDate) return "-";
+  const normalized = rawDate.includes("T") ? rawDate : rawDate.replace(" ", "T");
+  const parsed = new Date(normalized);
+  return Number.isNaN(parsed.getTime()) ? rawDate : parsed.toLocaleString();
+}
+
+function getStatusClass(status) {
+  if (status === "BOOKED") return "status-booked";
+  if (status === "COMPLETED") return "status-completed";
+  return "status-cancelled";
+}
+
 function CitizenDashboard() {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
-
+  const [doctors, setDoctors] = useState([]);
   const [doctorId, setDoctorId] = useState("");
   const [appointmentDate, setAppointmentDate] = useState("");
 
   useEffect(() => {
     fetchAppointments();
+    fetchDoctors();
   }, []);
 
   const fetchAppointments = async () => {
@@ -22,36 +36,39 @@ function CitizenDashboard() {
     }
   };
 
+  const fetchDoctors = async () => {
+    try {
+      const response = await api.get("/api/doctors");
+      setDoctors(response.data || []);
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+    }
+  };
+
   const handleBooking = async (e) => {
     e.preventDefault();
 
-    // Formatting date to include seconds for Spring Boot LocalDateTime
     const formattedDate = appointmentDate.includes(":") && appointmentDate.split(":").length === 2
       ? `${appointmentDate}:00`
       : appointmentDate;
 
-    const payload = {
-      doctorId: Number(doctorId),
-      appointmentDate: formattedDate,
-    };
-
     try {
-      const response = await api.post("/api/appointments", payload);
+      await api.post("/api/appointments", {
+        doctorId: Number(doctorId),
+        appointmentDate: formattedDate,
+      });
 
-      if (response.status === 200 || response.status === 201) {
-        alert("Appointment booked successfully!");
-        setDoctorId("");
-        setAppointmentDate("");
-        fetchAppointments();
-      }
+      alert("Appointment booked successfully!");
+      setDoctorId("");
+      setAppointmentDate("");
+      fetchAppointments();
     } catch (error) {
       if (error.response) {
-        console.error("Backend Error Data:", error.response.data);
         alert(`Booking failed: ${error.response.data.message || "Server Error"}`);
       } else {
-        console.error("Request Error:", error.message);
         alert("Booking failed: Could not connect to server.");
       }
+      console.error(error);
     }
   };
 
@@ -67,88 +84,69 @@ function CitizenDashboard() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-    navigate("/login");
+    navigate("/");
   };
 
   return (
-    <div style={{ padding: "50px", fontFamily: "Arial, sans-serif" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div className="page">
+      <div className="row">
         <h2>Citizen Dashboard</h2>
-        <button onClick={handleLogout} style={{ backgroundColor: "#ff4d4d", color: "white", border: "none", padding: "10px 20px", cursor: "pointer" }}>
-          Logout
-        </button>
+        <button onClick={handleLogout} className="danger">Logout</button>
       </div>
 
-      <hr />
-
-      <div style={{ maxWidth: "400px", background: "#f9f9f9", padding: "20px", borderRadius: "8px" }}>
+      <div className="panel">
         <h3>Book Appointment</h3>
         <form onSubmit={handleBooking}>
-          <div style={{ marginBottom: "15px" }}>
-            <label>Doctor ID:</label>
-            <input
-              type="number"
-              placeholder="Enter Doctor ID"
+          <div>
+            <p style={{ marginBottom: 6, fontWeight: 600 }}>Doctor</p>
+            <select
+              id="doctorId"
               value={doctorId}
               onChange={(e) => setDoctorId(e.target.value)}
               required
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-            />
+            >
+              <option value="">Select a doctor</option>
+              {doctors.map((doctor) => (
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.name} (ID: {doctor.id}) - {doctor.specialization}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>Date & Time:</label>
+          <div>
+            <p style={{ marginBottom: 6, fontWeight: 600 }}>Date &amp; Time</p>
             <input
+              id="appointmentDate"
               type="datetime-local"
               value={appointmentDate}
               onChange={(e) => setAppointmentDate(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
               required
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
             />
           </div>
 
-          <button type="submit" style={{ width: "100%", padding: "10px", backgroundColor: "#007bff", color: "white", border: "none", cursor: "pointer" }}>
-            Confirm Booking
-          </button>
+          <div className="actions">
+            <button type="submit" className="primary">Confirm Booking</button>
+          </div>
         </form>
       </div>
 
-      <hr />
-
-      <h3>My Appointments</h3>
-
+      <h3 style={{ marginTop: 20 }}>My Appointments</h3>
       {appointments.length === 0 ? (
-        <p>No appointments found.</p>
+        <p className="muted">No appointments found.</p>
       ) : (
-        <div style={{ display: "grid", gap: "15px" }}>
+        <div className="card-list">
           {appointments.map((appointment) => (
-            <div key={appointment.id} style={{ border: "1px solid #ddd", padding: "15px", borderRadius: "5px" }}>
+            <div key={appointment.id} className="card">
               <strong>Doctor:</strong> {appointment.doctorName} <br />
               <strong>Specialization:</strong> {appointment.specialization} <br />
-              <strong>Date:</strong> {new Date(appointment.appointmentDate).toLocaleString()} <br />
-              <strong>Status:</strong>{" "}
-              <span
-                style={{
-                  color:
-                    appointment.status === "BOOKED"
-                      ? "blue"
-                      : appointment.status === "COMPLETED"
-                      ? "green"
-                      : "red",
-                  fontWeight: "bold",
-                }}
-              >
-                {appointment.status}
-              </span>
+              <strong>Date:</strong> {formatAppointmentDate(appointment.appointmentDate)} <br />
+              <strong>Status:</strong> <span className={getStatusClass(appointment.status)}>{appointment.status}</span>
 
               {appointment.status === "BOOKED" && (
-                <div style={{ marginTop: "10px" }}>
-                  <button
-                    onClick={() => handleCancel(appointment.id)}
-                    style={{ backgroundColor: "transparent", color: "red", border: "1px solid red", cursor: "pointer", padding: "5px 10px" }}
-                  >
-                    Cancel Appointment
-                  </button>
+                <div className="actions">
+                  <button onClick={() => handleCancel(appointment.id)} className="ghost">Cancel Appointment</button>
                 </div>
               )}
             </div>
