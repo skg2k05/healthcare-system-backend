@@ -150,9 +150,9 @@ function CitizenDashboard() {
                   <button onClick={() => handleCancel(appointment.id)} className="ghost">Cancel Appointment</button>
                 </div>
               )}
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );
