@@ -4,7 +4,7 @@ import api from "../services/api";
 
 function Login() {
   const navigate = useNavigate();
-
+  const buildTag = import.meta.env.VITE_APP_BUILD_TAG || "local";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -12,60 +12,56 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await api.post("/api/auth/login", {
-        email,
-        password,
-      });
-
-      const token = response.data.token;
-      const role = response.data.role;
+      const response = await api.post("/api/auth/login", { email, password });
+      const { token, role } = response.data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
 
-      if (role === "CITIZEN") {
-        navigate("/citizen-dashboard");
-      } else if (role === "DOCTOR") {
-        navigate("/doctor-dashboard");
-      }
-
+      if (role === "CITIZEN") navigate("/citizen-dashboard");
+      if (role === "DOCTOR") navigate("/doctor-dashboard");
     } catch (error) {
-      alert("Login Failed");
+      alert("Login failed. Please check email/password.");
       console.error(error);
     }
   };
 
   return (
-    <div style={{ padding: "50px" }}>
-      <h2>Login</h2>
+    <div className="page">
+      <div className="panel auth-box">
+        <h2>Healthcare Login</h2>
+        <p className="muted">Sign in as Citizen or Doctor.</p>
 
-      <form onSubmit={handleLogin}>
-        <div>
-          <input
-            type="email"
-            placeholder="Enter Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
+        <form onSubmit={handleLogin}>
+          <label>
+            Email
+            <input
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
 
-        <br />
+          <label>
+            Password
+            <input
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </label>
 
-        <div>
-          <input
-            type="password"
-            placeholder="Enter Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
+          <div className="actions">
+            <button type="submit" className="primary">Login</button>
+          </div>
+        </form>
 
-        <br />
-
-        <button type="submit">Login</button>
-      </form>
+        <p className="muted" style={{ marginTop: 12, fontSize: 12 }}>Build: {buildTag}</p>
+      </div>
     </div>
   );
 }
