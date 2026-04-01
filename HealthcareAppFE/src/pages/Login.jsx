@@ -4,7 +4,6 @@ import api from "../services/api";
 
 function Login() {
   const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -12,23 +11,14 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await api.post("/api/auth/login", {
-        email,
-        password,
-      });
-
-      const token = response.data.token;
-      const role = response.data.role;
+      const response = await api.post("/api/auth/login", { email, password });
+      const { token, role } = response.data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
 
-      if (role === "CITIZEN") {
-        navigate("/citizen-dashboard");
-      } else if (role === "DOCTOR") {
-        navigate("/doctor-dashboard");
-      }
-
+      if (role === "CITIZEN") navigate("/citizen-dashboard");
+      else if (role === "DOCTOR") navigate("/doctor-dashboard");
     } catch (error) {
       alert("Login Failed");
       console.error(error);
@@ -38,7 +28,6 @@ function Login() {
   return (
     <div style={{ padding: "50px" }}>
       <h2>Login</h2>
-
       <form onSubmit={handleLogin}>
         <div>
           <input
@@ -49,9 +38,7 @@ function Login() {
             required
           />
         </div>
-
         <br />
-
         <div>
           <input
             type="password"
@@ -61,9 +48,7 @@ function Login() {
             required
           />
         </div>
-
         <br />
-
         <button type="submit">Login</button>
       </form>
     </div>
