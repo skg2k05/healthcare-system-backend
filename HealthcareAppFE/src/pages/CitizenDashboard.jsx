@@ -19,6 +19,7 @@ function CitizenDashboard() {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
+
   const [doctorId, setDoctorId] = useState("");
   const [appointmentDate, setAppointmentDate] = useState("");
 
@@ -97,9 +98,14 @@ function CitizenDashboard() {
       <div className="panel">
         <h3>Book Appointment</h3>
         <form onSubmit={handleBooking}>
-          <label>
-            Doctor
-            <select value={doctorId} onChange={(e) => setDoctorId(e.target.value)} required>
+          <div style={{ marginBottom: "15px" }}>
+            <label>Doctor ID:</label>
+            <select
+              value={doctorId}
+              onChange={(e) => setDoctorId(e.target.value)}
+              required
+              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+            >
               <option value="">Select a doctor</option>
               {doctors.map((doctor) => (
                 <option key={doctor.id} value={doctor.id}>
@@ -107,10 +113,10 @@ function CitizenDashboard() {
                 </option>
               ))}
             </select>
-          </label>
+          </div>
 
-          <label>
-            Date &amp; Time
+          <div style={{ marginBottom: "15px" }}>
+            <label>Date & Time:</label>
             <input
               type="datetime-local"
               value={appointmentDate}
