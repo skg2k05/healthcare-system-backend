@@ -2,9 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
+function getStatusClass(status) {
+  if (status === "BOOKED") return "status-booked";
+  if (status === "COMPLETED") return "status-completed";
+  return "status-cancelled";
+}
+
 function DoctorDashboard() {
   const navigate = useNavigate();
-
   const [appointments, setAppointments] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -15,12 +20,9 @@ function DoctorDashboard() {
 
   const fetchAppointments = async () => {
     try {
-      const response = await api.get(
-        `/api/appointments/doctor/my?page=${page}&size=5`
-      );
-
-      setAppointments(response.data.content);
-      setTotalPages(response.data.totalPages);
+      const response = await api.get(`/api/appointments/doctor/my?page=${page}&size=5`);
+      setAppointments(response.data.content || []);
+      setTotalPages(response.data.totalPages || 0);
     } catch (error) {
       console.error("Error fetching doctor appointments", error);
     }
@@ -28,10 +30,7 @@ function DoctorDashboard() {
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
-      await api.patch(`/api/appointments/${id}/status`, {
-        status: newStatus,
-      });
-
+      await api.patch(`/api/appointments/${id}/status`, { status: newStatus });
       fetchAppointments();
     } catch (error) {
       console.error("Status update failed", error);
@@ -41,82 +40,52 @@ function DoctorDashboard() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-    navigate("/login");
+    navigate("/");
   };
 
   return (
-    <div style={{ padding: "50px" }}>
-      <h2>Doctor Dashboard</h2>
+    <div className="page">
+      <div className="row">
+        <h2>Doctor Dashboard</h2>
+        <button onClick={handleLogout} className="danger">Logout</button>
+      </div>
 
-      <button onClick={handleLogout}>Logout</button>
+      <div className="panel">
+        <h3>My Appointments (Page {page + 1})</h3>
 
-      <hr />
+        {appointments.length === 0 ? (
+          <p className="muted">No appointments found.</p>
+        ) : (
+          <div className="card-list">
+            {appointments.map((appointment) => (
+              <div key={appointment.id} className="card">
+                <strong>Patient:</strong> {appointment.patientEmail} <br />
+                <strong>Specialization:</strong> {appointment.specialization} <br />
+                <strong>Status:</strong> <span className={getStatusClass(appointment.status)}>{appointment.status}</span>
 
-      <h3>My Appointments (Page {page + 1})</h3>
+                {appointment.status === "BOOKED" && (
+                  <div className="actions">
+                    <button onClick={() => handleStatusUpdate(appointment.id, "COMPLETED")} className="primary">
+                      Mark Completed
+                    </button>
+                    <button onClick={() => handleStatusUpdate(appointment.id, "CANCELLED")} className="ghost">
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
-      {appointments.length === 0 ? (
-        <p>No appointments found.</p>
-      ) : (
-        <ul>
-          {appointments.map((appointment) => (
-            <li key={appointment.id} style={{ marginBottom: "20px" }}>
-              <strong>Patient:</strong> {appointment.patientEmail} <br />
-              <strong>Specialization:</strong> {appointment.specialization}{" "}
-              <br />
-              <strong>Status:</strong>{" "}
-              <span
-                style={{
-                  color:
-                    appointment.status === "BOOKED"
-                      ? "blue"
-                      : appointment.status === "COMPLETED"
-                      ? "green"
-                      : "red",
-                  fontWeight: "bold",
-                }}
-              >
-                {appointment.status}
-              </span>
-
-              {appointment.status === "BOOKED" && (
-                <>
-                  <br />
-                  <button
-                    onClick={() =>
-                      handleStatusUpdate(appointment.id, "COMPLETED")
-                    }
-                  >
-                    Mark Completed
-                  </button>{" "}
-                  <button
-                    onClick={() =>
-                      handleStatusUpdate(appointment.id, "CANCELLED")
-                    }
-                  >
-                    Cancel
-                  </button>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <hr />
-
-      <div>
-        <button
-          onClick={() => setPage(page - 1)}
-          disabled={page === 0}
-        >
-          Previous
-        </button>{" "}
-        <button
-          onClick={() => setPage(page + 1)}
-          disabled={page + 1 >= totalPages}
-        >
-          Next
-        </button>
+        <div className="actions" style={{ marginTop: 16 }}>
+          <button onClick={() => setPage(page - 1)} disabled={page === 0}>
+            Previous
+          </button>
+          <button onClick={() => setPage(page + 1)} disabled={page + 1 >= totalPages}>
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
