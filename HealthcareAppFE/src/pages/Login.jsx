@@ -18,39 +18,47 @@ function Login() {
       localStorage.setItem("role", role);
 
       if (role === "CITIZEN") navigate("/citizen-dashboard");
-      else if (role === "DOCTOR") navigate("/doctor-dashboard");
+      if (role === "DOCTOR") navigate("/doctor-dashboard");
     } catch (error) {
-      alert("Login Failed");
+      alert("Login failed. Please check email/password.");
       console.error(error);
     }
   };
 
   return (
-    <div style={{ padding: "50px" }}>
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <div>
-          <input
-            type="email"
-            placeholder="Enter Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <br />
-        <div>
-          <input
-            type="password"
-            placeholder="Enter Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <br />
-        <button type="submit">Login</button>
-      </form>
+    <div className="page">
+      <div className="panel auth-box">
+        <h2>Healthcare Login</h2>
+        <p className="muted">Sign in as Citizen or Doctor.</p>
+
+        <form onSubmit={handleLogin}>
+          <label>
+            Email
+            <input
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
+
+          <label>
+            Password
+            <input
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </label>
+
+          <div className="actions">
+            <button type="submit" className="primary">Login</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
