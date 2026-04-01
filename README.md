@@ -47,6 +47,7 @@ View Own Appointments	          CITIZEN
 Cancel Own Appointment	          CITIZEN
 View Doctor Appointments	      DOCTOR
 Update Appointment Status	      DOCTOR
+List Doctors	                  AUTHENTICATED USER
 ```
 
 ## Appointment State Rules
