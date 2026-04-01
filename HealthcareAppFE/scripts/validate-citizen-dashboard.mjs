@@ -8,4 +8,11 @@ if (/<<<<<<<|=======|>>>>>>>/.test(content)) {
   process.exit(1);
 }
 
-console.log("[prebuild] CitizenDashboard conflict-marker check passed.");
+if (content.includes("</label>")) {
+  console.error(
+    "[prebuild] Unexpected </label> detected in CitizenDashboard.jsx. Please keep the latest fixed form markup before deploying."
+  );
+  process.exit(1);
+}
+
+console.log("[prebuild] CitizenDashboard sanity checks passed.");
