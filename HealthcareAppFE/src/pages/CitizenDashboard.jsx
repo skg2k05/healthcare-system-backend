@@ -115,9 +115,10 @@ function CitizenDashboard() {
             </select>
           </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>Date & Time:</label>
+          <div>
+            <label htmlFor="appointmentDate">Date &amp; Time</label>
             <input
+              id="appointmentDate"
               type="datetime-local"
               value={appointmentDate}
               onChange={(e) => setAppointmentDate(e.target.value)}
