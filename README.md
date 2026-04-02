@@ -3,6 +3,11 @@
 A secure, role-based Healthcare Appointment System API built using Spring Boot.
 This project demonstrates production-level backend architecture with authentication, authorization, business rule enforcement, and API documentation.
 
+![Java](https://img.shields.io/badge/Java-17-blue)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-Backend-green)
+![JWT](https://img.shields.io/badge/Auth-JWT-orange)
+![Status](https://img.shields.io/badge/Status-Stable-success)
+
 ## Project Overview
 
 This backend API allows:
@@ -194,3 +199,19 @@ If login works locally but fails on Render, verify the following:
 
 ## Stable Release Note
 - Baseline freeze: `v1.0.0` (see `CHANGELOG.md`).
+
+---
+## 📄 License
+MIT License - Open source and free to use.
+
+---
+## 🤝 Contributing
+
+Contributions are welcome!  
+Feel free to open issues or submit pull requests for improvements, bug fixes, or new features.
+
+---
+## 🚀 Release
+
+v1.0.0 — Stable Backend Release  
+January 2026
