@@ -47,6 +47,7 @@ View Own Appointments	          CITIZEN
 Cancel Own Appointment	          CITIZEN
 View Doctor Appointments	      DOCTOR
 Update Appointment Status	      DOCTOR
+List Doctors	                  AUTHENTICATED USER
 ```
 
 ## Appointment State Rules
@@ -175,6 +176,8 @@ If login works locally but fails on Render, verify the following:
 
 ### Default Seed Login Users
 On startup, the app seeds/updates these login users:
-On startup, the app now ensures these login users exist:
 - `kabir@test.com` / `secret1234` (role: `CITIZEN`)
 - `dr.sharma@test.com` / `doctor123` (role: `DOCTOR`)
+
+## Stable Release Note
+- Baseline freeze: `v1.0.0` (see `CHANGELOG.md`).

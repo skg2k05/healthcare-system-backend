@@ -5,8 +5,8 @@ import com.healthcare.healthcare_system.model.User;
 import com.healthcare.healthcare_system.repository.DoctorRepository;
 import com.healthcare.healthcare_system.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Component
 public class DataInitializer {
@@ -27,6 +27,7 @@ public class DataInitializer {
 
     @PostConstruct
     public void seedDoctors() {
+
         seedDoctorIfNotExists("Dr. Sharma", "dr.sharma@test.com", "Cardiology");
         seedDoctorIfNotExists("Dr. Mehta", "dr.mehta@test.com", "Dermatology");
         seedDoctorIfNotExists("Dr. Iyer", "dr.iyer@test.com", "Neurology");
@@ -46,10 +47,12 @@ public class DataInitializer {
 
     private void seedOrUpdateDefaultUser(String name, String email, String role, String rawPassword) {
         User user = userRepository.findByEmail(email).orElseGet(User::new);
+
         user.setName(name);
         user.setEmail(email);
         user.setRole(role);
         user.setPassword(passwordEncoder.encode(rawPassword));
+
         userRepository.save(user);
         System.out.println("Seeded/updated login user: " + email + " (" + role + ")");
     }
