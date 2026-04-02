@@ -75,13 +75,16 @@ This ensures data integrity and real-world workflow consistency.
 - Swagger (springdoc-openapi)
 - Maven
 
-## API Documentation
-Swagger UI available at:
-```
-http://localhost:8081/swagger-ui/index.html
-```
-All APIs can be tested directly through Swagger.
+---
+### Render Deployed Link 
+https://healthcare-system-backend-1.onrender.com
 
+---
+### Default Seed Login Users
+On startup, the app seeds/updates these login users:
+- Name: `kabir@test.com` Password :`secret1234` (role: `CITIZEN`)
+- Name: `dr.sharma@test.com` Password :`doctor123` (role: `DOCTOR`)
+---
 ## Project Structure
 ```
 Healthcare_Appointment_System/
@@ -123,6 +126,8 @@ mvn clean install
 4. Start application
 5. Open Swagger UI
 
+---
+
 ## Key Implemented Features
 - JWT-based authentication
 - Role-based endpoint protection
@@ -149,15 +154,7 @@ This project demonstrates:
 - Real-world state management
 - RESTful API design
 - Production-ready error handling
-
-### Default Seed Login Users
-On startup, the app seeds/updates these login users:
-- Name: `kabir@test.com` Password :`secret1234` (role: `CITIZEN`)
-- Name: `dr.sharma@test.com` Password :`doctor123` (role: `DOCTOR`)
-
-## Render Deployed Link 
-https://healthcare-system-backend-1.onrender.com
-
+  
 ---
 ## Render Deployment Notes (Backend + Frontend)
 
