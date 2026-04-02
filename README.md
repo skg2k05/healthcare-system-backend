@@ -1,4 +1,4 @@
-## # Healthcare Appointment System API
+## Healthcare Appointment System API
 
 A secure, role-based # Healthcare Appointment System API built using Spring Boot.
 This project demonstrates production-level backend architecture with authentication, authorization, business rule enforcement, and API documentation.
