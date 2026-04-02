@@ -1,11 +1,11 @@
-## Healthcare Appointment Management System (Backend)
+## # Healthcare Appointment System API
 
-A secure, role-based Healthcare Appointment Management backend built using Spring Boot.
+A secure, role-based # Healthcare Appointment System API built using Spring Boot.
 This project demonstrates production-level backend architecture with authentication, authorization, business rule enforcement, and API documentation.
 
 ## Project Overview
 
-This system allows:
+This backend API allows:
 - Citizens to book and manage appointments
 - Doctors to view and update appointment status
 - Role-based secure access using JWT
@@ -135,7 +135,7 @@ mvn clean install
 
 ## Future Improvements
 - Frontend integration (React)
-- Deployment (Render / AWS / Railway)
+- Deployment ( AWS / Railway)
 - Email notifications
 - Admin role
 - Unit & Integration tests
@@ -149,6 +149,16 @@ This project demonstrates:
 - Real-world state management
 - RESTful API design
 - Production-ready error handling
+
+### Default Seed Login Users
+On startup, the app seeds/updates these login users:
+- `kabir@test.com` / `secret1234` (role: `CITIZEN`)
+- `dr.sharma@test.com` / `doctor123` (role: `DOCTOR`)
+
+## Render Deployed Link 
+https://healthcare-system-backend-1.onrender.com
+
+---
 
 ## Render Deployment Notes (Backend + Frontend)
 
@@ -173,11 +183,8 @@ If login works locally but fails on Render, verify the following:
    `https://<backend-url>/api/auth/login`
 3. Confirm backend CORS allows your exact frontend domain.
 4. Confirm user actually exists in the deployed database.
-
-### Default Seed Login Users
-On startup, the app seeds/updates these login users:
-- `kabir@test.com` / `secret1234` (role: `CITIZEN`)
-- `dr.sharma@test.com` / `doctor123` (role: `DOCTOR`)
+   
+---
 
 ## Stable Release Note
 - Baseline freeze: `v1.0.0` (see `CHANGELOG.md`).
