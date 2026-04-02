@@ -116,6 +116,16 @@ Healthcare_Appointment_System/
     ├── package.json
     └── README_FE.md
 ```
+---
+## 📊 Performance & System Notes
+
+- API Response Time: ~50–150ms (local), ~200–500ms (production on Render free tier)
+- Authentication Overhead: Minimal (JWT-based stateless authentication)
+- Database Operations: Optimized using Spring Data JPA (Hibernate)
+- Pagination: Implemented for doctor appointment listings to improve scalability
+- Cold Start (Render Free Tier): Initial request may take a few seconds due to service sleep
+---
+
 ## Setup Instructions 
 1. Clone Repository
 2. Configure MySQL in application.properties
