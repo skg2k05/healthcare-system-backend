@@ -117,7 +117,7 @@ Healthcare_Appointment_System/
     └── README_FE.md
 ```
 ---
-## 📊 Performance & System Notes
+## Performance & System Notes
 
 - API Response Time: ~50–150ms (local), ~200–500ms (production on Render free tier)
 - Authentication Overhead: Minimal (JWT-based stateless authentication)
