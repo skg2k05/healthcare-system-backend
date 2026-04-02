@@ -16,7 +16,7 @@ The focus of this project is backend architecture, security, and clean business 
 
 The project follows layered architecture:
 ```
-Controller → Service → Repository → Database
+Controller → Service → Repository → Security
 ```
 
 ### Layers:
@@ -152,14 +152,13 @@ This project demonstrates:
 
 ### Default Seed Login Users
 On startup, the app seeds/updates these login users:
-- `kabir@test.com` / `secret1234` (role: `CITIZEN`)
-- `dr.sharma@test.com` / `doctor123` (role: `DOCTOR`)
+- Name: `kabir@test.com` Password :`secret1234` (role: `CITIZEN`)
+- Name: `dr.sharma@test.com` Password :`doctor123` (role: `DOCTOR`)
 
 ## Render Deployed Link 
 https://healthcare-system-backend-1.onrender.com
 
 ---
-
 ## Render Deployment Notes (Backend + Frontend)
 
 If login works locally but fails on Render, verify the following:
