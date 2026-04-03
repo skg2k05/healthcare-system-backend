@@ -15,6 +15,7 @@ This backend API allows:
 - Doctors to view and update appointment status
 - Role-based secure access using JWT
 - Controlled appointment state transitions
+  
 The focus of this project is backend architecture, security, and clean business logic implementation.
 
 ## Architecture
